@@ -16,6 +16,7 @@
 #import "OtheAnchorView.h"
 #import <QuartzCore/CALayer.h>
 #import "User.h"
+#import "GiftView.h"
 @interface LivingViewCell()
 {
     BarrageRenderer *_renderer;
@@ -36,6 +37,8 @@
 @property(nonatomic, weak) UIImageView *otherView;
 /** 同一个工会的主播 */
 @property (nonatomic, weak) OtheAnchorView *otheAnchorView;
+/** 礼物 view */
+@property (nonatomic, weak) GiftView *giftView;
 /** 直播结束的界面 */
 @property (nonatomic, weak) LiveEndView *endView;
 /** 粒子动画 */
@@ -46,6 +49,8 @@
 @property (nonatomic, assign) NSInteger  state;
 
 @property (nonatomic, strong) NSArray *otheAnchorUser;//同频道主播数据
+
+@property (nonatomic, weak) NHPresentFlower *flower;
 
 @end
 @implementation LivingViewCell
@@ -78,11 +83,12 @@
         _loveArr = [NSMutableArray array];
         self.state = 1;
         _renderer = [[BarrageRenderer alloc] init];
-        _renderer.canvasMargin = UIEdgeInsetsMake(KScreenHeight * 0.3, 10, 10, 10);
+//        CGFloat top, CGFloat left, CGFloat bottom, CGFloat right
+        _renderer.canvasMargin = UIEdgeInsetsMake(KScreenHeight * 0.6, 10, 20, KScreenWidth*0.3);
         //打开_renderer的交互
         _renderer.view.userInteractionEnabled = YES;
         [self.contentView addSubview:_renderer.view];
-        
+        [_renderer start];//默认是开始的
         NSSafeObject * safeObj = [[NSSafeObject alloc]initWithObject:self withSelector:@selector(autoSendBarrage)];
         
         _timer = [NSTimer scheduledTimerWithTimeInterval:0.5 target:safeObj selector:@selector(excute) userInfo:nil repeats:YES];
@@ -242,7 +248,7 @@
 {
     NSInteger spriteNumber = [_renderer spritesNumberWithName:nil];
     if (spriteNumber <= 50) { // 限制屏幕上的弹幕量
-        [_renderer receive:[self walkTextSpriteDescriptorWithDirection:BarrageWalkDirectionR2L]];
+        [_renderer receive:[self walkTextSpriteDescriptorWithDirection:BarrageWalkDirectionB2T]];
     }
 }
 #pragma mark - 弹幕描述符生产方法
@@ -273,10 +279,6 @@ long _index = 0;
 }
 
 
-
-
-
-
 //===========================懒加载   视图框架===========================
 
 - (UIImageView *)placeHolderView
@@ -295,7 +297,7 @@ long _index = 0;
 }
 
 
-bool _isSelected = NO;
+bool _isSelected = YES;
 #pragma mark  底部栏
 - (LivingBottomToolView *)toolView
 {
@@ -311,7 +313,8 @@ bool _isSelected = NO;
                     [self showInfo:@"私聊"];
                     break;
                 case LiveToolTypeGift://礼物
-                    [self showInfo:@"礼物"];
+//                    [self showInfo:@"礼物"];
+                    [self giveGift];
                     break;
                 case LiveToolTypeRank://排名
                     [self showInfo:@"排名"];
@@ -487,6 +490,7 @@ bool _isSelected = NO;
     }
     return _otheAnchorUser;
 }
+#pragma mark 同工会点击
 - (void)clickOther
 {
     self.otheAnchorView.audienceUsers =   self.otheAnchorUser;
@@ -499,12 +503,28 @@ bool _isSelected = NO;
 
     }];
 }
+#pragma mark 送礼
+-(void)giveGift{
+    self.giftView.inter = 1;
+    
+    [UIView animateWithDuration:0.5 animations:^{
+        self.giftView.hidden = NO;
+        self.giftView.transform = CGAffineTransformMakeTranslation(0, -120);
+        
+    } completion:^(BOOL finished) {
+        
+    }];
+    
+
+}
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     [UIView animateWithDuration:1.0 animations:^{
         self.otheAnchorView.transform = CGAffineTransformIdentity;
+        self.giftView.transform = CGAffineTransformIdentity;
         
         } completion:^(BOOL finished) {
         self.otheAnchorView.hidden = YES;
+        self.giftView.hidden = YES;
     }];
     
 }
@@ -546,6 +566,82 @@ bool _isSelected = NO;
         
     }
     return _otheAnchorView;
+}
+
+-(GiftView*)giftView{
+
+    if (!_giftView) {
+        GiftView* giftView =[[GiftView alloc] initWithFrame:CGRectMake(0,KScreenHeight , KScreenWidth, 80)];
+        [self.contentView addSubview:giftView];
+        [giftView setClickToolBlock:^(LiveGiftType type) {
+            switch (type) {
+                case LiveGiftporsche://跑车
+                    [self givePorscheGift];
+                    break;
+                case LiveGiftfighter://战斗机
+                     [self givefighterGift];
+                    break;
+                case LiveGiftplane://客机
+                    [self giveplaneGift];
+                    break;
+                case LiveGiftflower_a://鲜花
+                    [self giveflower_aGift];
+                    break;
+                default:
+                    break;
+            }
+        }];
+        giftView.hidden =YES;
+        _giftView = giftView;
+    }
+    return _giftView;
+}
+#pragma mark  跑车
+-(void)givePorscheGift{
+    NHCarViews *car = [NHCarViews loadCarViewWithPoint:CGPointZero];
+    
+    //数组中放CGRect数据，CGRect的x和y分别作为控制点的x和y，CGRect的width和height作为结束点的x和y
+    //方法如下：数组内的每个元素代码一个控制点和结束点
+    NSMutableArray *pointArrs = [[NSMutableArray alloc] init];
+    CGFloat width = [UIScreen mainScreen].bounds.size.width / 2;
+    [pointArrs addObject:NSStringFromCGRect(CGRectMake(width, 300, width, 300))];
+    //    pointArrs addObject:...添加更多的CGRect
+    car.curveControlAndEndPoints = pointArrs;
+    
+    [car addAnimationsMoveToPoint:CGPointMake(0, 100) endPoint:CGPointMake(KScreenWidth +166, 500)];
+    [self.contentView addSubview:car];
+}
+#pragma mark  战斗机
+-(void)givefighterGift{
+    NHFighterView *fighter = [NHFighterView loadFighterViewWithPoint:CGPointMake(10, 100)];
+    //fighter.curveControlAndEndPoints 用法同carView一样
+    [fighter addAnimationsMoveToPoint:CGPointMake(KScreenWidth, 60) endPoint:CGPointMake( -500, 600)];
+    [self.contentView addSubview:fighter];
+}
+#pragma mark  客机
+-(void)giveplaneGift{
+    NHPlaneViews *plane = [NHPlaneViews loadPlaneViewWithPoint:CGPointMake(NHBounds.width + 232, 0)];
+    //plane.curveControlAndEndPoints 用法同carView一样
+    
+    [plane addAnimationsMoveToPoint:CGPointMake(NHBounds.width, 100) endPoint:CGPointMake(-500, 410)];
+    [self.contentView addSubview:plane];
+}
+#pragma mark 鲜花
+-(void)giveflower_aGift{
+    if (_flower == nil) {
+        [self addFlowerView];
+    }else{
+        _flower.effect = NHSendEffectSpring;
+        //_flower.scaleValue = @[@4.2,@3.5,@1.2,@3.8,@3.3,@3.0,@2.0,@1.0];
+        [_flower continuePresentFlowers];
+    }
+
+}
+- (void)addFlowerView{
+    NHPresentFlower *flower = [[NHPresentFlower alloc] initWithFrame:CGRectMake(0, 200, KScreenWidth, 50)presentFlowerEffect:NHSendEffectShake];
+    flower.autoHiddenTime = 5;
+    [self.contentView addSubview:flower];
+    _flower = flower;
 }
 
 

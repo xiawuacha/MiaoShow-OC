@@ -28,6 +28,8 @@
 -(void)setup{
 
     UIScrollView* ScrollView =[[UIScrollView alloc] initWithFrame:self.bounds];
+    ScrollView.showsHorizontalScrollIndicator =NO;
+    ScrollView.showsVerticalScrollIndicator = NO;
     [self addSubview:ScrollView];
     self.ScrollView = ScrollView;
     
