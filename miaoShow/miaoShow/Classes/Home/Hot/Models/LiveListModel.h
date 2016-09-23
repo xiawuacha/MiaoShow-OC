@@ -9,42 +9,34 @@
 #import <Foundation/Foundation.h>
 
 @interface LiveListModel : NSObject
-/** 直播流地址 */
-@property (nonatomic, copy) NSString *flv;
-
-@property (nonatomic, assign) NSInteger grade;
-/** 主播名 */
-@property (nonatomic, copy) NSString *myname;
-/** 主播头像 */
-@property (nonatomic, copy) NSString *smallpic;
-/** 服务器id */
-@property (nonatomic, assign) NSInteger serverid;
-/** 直播房间号码 */
-@property (nonatomic, assign) NSInteger roomid;
-/** 所在城市 */
-@property (nonatomic, copy) NSString *gps;
-/** 星级 */
-@property (nonatomic, assign) NSInteger starlevel;
-
-@property (nonatomic, assign) NSInteger level;
-/** 个性签名 */
-@property (nonatomic, copy) NSString *signatures;
 /** 直播图 */
-@property (nonatomic, copy) NSString *bigpic;
+@property (nonatomic, copy  ) NSString   *bigpic;
+/** 主播头像 */
+@property (nonatomic, copy  ) NSString   *smallpic;
+/** 直播流地址 */
+@property (nonatomic, copy  ) NSString   *flv;
+/** 所在城市 */
+@property (nonatomic, copy  ) NSString   *gps;
+/** 主播名 */
+@property (nonatomic, copy  ) NSString   *myname;
+/** 个性签名 */
+@property (nonatomic, copy  ) NSString   *signatures;
 /** 用户ID */
-@property (nonatomic, copy) NSString *userId;
-
-@property (nonatomic, assign) NSInteger curexp;
-
-@property (nonatomic, assign) NSInteger useridx;
-
-@property (nonatomic, copy) NSString *familyName;
-
-@property (nonatomic, assign) NSInteger gender;
+@property (nonatomic, copy  ) NSString   *userId;
+/** 星级 */
+@property (nonatomic, assign) NSUInteger starlevel;
 /** 朝阳群众数目 */
-@property (nonatomic, assign) NSInteger allnum;
-
-
+@property (nonatomic, assign) NSUInteger allnum;
+/** 这玩意未知 */
+@property (nonatomic, assign) NSUInteger lrCurrent;
+/** 直播房间号码 */
+@property (nonatomic, assign) NSUInteger roomid;
+/** 所处服务器 */
+@property (nonatomic, assign) NSUInteger serverid;
+/** 用户ID */
+@property (nonatomic, assign) NSString   *useridx;
+/** 排名 */
+@property (nonatomic, assign) NSUInteger pos;
 /** starImage */
 @property (nonatomic, strong) UIImage    *starImage;
 

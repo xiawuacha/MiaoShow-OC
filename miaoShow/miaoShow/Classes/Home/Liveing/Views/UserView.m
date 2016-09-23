@@ -47,7 +47,6 @@
     
      [self showInfo:@"关注成功"];
 }
-
 - (IBAction)tipoffs {
     [self showInfo:@"举报成功"];
 }
@@ -57,4 +56,15 @@
         self.closeBlock();
     }
 }
+
+- (IBAction)privateChat:(id)sender {
+    [self showInfo:@"私聊"];
+}
+- (IBAction)yaobo:(id)sender {
+    [self showInfo:@"邀播"];
+}
+- (IBAction)more:(id)sender {
+    [self showInfo:@"更多"];
+}
+
 @end

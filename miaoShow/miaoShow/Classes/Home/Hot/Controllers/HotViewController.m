@@ -13,6 +13,7 @@
 #import "LiveADModel.h"
 #import "LiveListModel.h"
 #import "WebViewController.h"
+#import "LiveIngCollectionViewController.h"
 @interface HotViewController ()<UITableViewDelegate,UITableViewDataSource>
 /** 当前页 */
 @property(nonatomic, assign) NSUInteger currentPage;
@@ -153,10 +154,10 @@ static NSString *ADReuseIdentifier = @"HomeADTableViewCell";
                     WebViewController *web = [[WebViewController alloc] initWithUrlStr:topAD.link];
                     web.navigationItem.title = topAD.title;
                   
+                    //通知  让home控制器 移除热点 最新 关注 导航栏
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"hideSelectedView" object:nil];
                     
-////                    [self.selectedView removeFromSuperview];
-//                    self.selectedView = nil;
+
                     [self.navigationController pushViewController:web animated:YES];
                 }
             }];
@@ -175,10 +176,10 @@ static NSString *ADReuseIdentifier = @"HomeADTableViewCell";
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//    ALinLiveCollectionViewController *liveVc = [[ALinLiveCollectionViewController alloc] init];
-//    liveVc.lives = self.lives;
-//    liveVc.currentIndex = indexPath.row-1;
-//    [self presentViewController:liveVc animated:YES completion:nil];
+    LiveIngCollectionViewController *liveVc = [[LiveIngCollectionViewController alloc] init];
+    liveVc.lives = self.lives;
+    liveVc.currentIndex = indexPath.row-1;
+    [self presentViewController:liveVc animated:YES completion:nil];
 }
 
 - (void)didReceiveMemoryWarning {

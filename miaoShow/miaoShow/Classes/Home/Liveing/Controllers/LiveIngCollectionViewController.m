@@ -22,13 +22,45 @@ static NSString * const reuseIdentifier = @"LivingViewCell";
     //自定义一个LivingFlowLayout   设置collectionCell 为屏幕大小
     return [super initWithCollectionViewLayout:[[LivingFlowLayout alloc] init]];
 }
+-(void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     
 
-    // Register cell classes
-    [self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:reuseIdentifier];
+    self.collectionView.backgroundColor = [UIColor whiteColor];
+
+    [self.collectionView registerClass:[LivingViewCell class] forCellWithReuseIdentifier:reuseIdentifier];
+    
+    RefreshGifHeader *header = [RefreshGifHeader headerWithRefreshingBlock:^{
+        [self.collectionView.mj_header endRefreshing];
+        self.currentIndex++;
+        if (self.currentIndex == self.lives.count) {
+            self.currentIndex = 0;
+        }
+        [self.collectionView reloadData];
+    }];
+    header.stateLabel.hidden = NO;
+    [header setTitle:@"下拉切换另一个主播" forState:MJRefreshStatePulling];
+    [header setTitle:@"下拉切换另一个主播" forState:MJRefreshStateIdle];
+    self.collectionView.mj_header = header;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clickUser:) name:kNotifyClickUser object:nil];
    
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ClickOtherAnchor:) name:kNotifyClickOtherAnchor object:nil];
+}
+- (void)clickUser:(NSNotification *)notify
+{
+    if (notify.userInfo[@"user"] != nil) {
+        User *user = notify.userInfo[@"user"];
+        self.userView.user = user;
+        [UIView animateWithDuration:0.5 animations:^{
+            self.userView.transform = CGAffineTransformIdentity;
+        }];
+    }
 }
 - (UserView *)userView
 {
@@ -39,8 +71,8 @@ static NSString * const reuseIdentifier = @"LivingViewCell";
         
         [userView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.center.equalTo(@0);
-            make.width.equalTo(@(KScreenWidth));
-            make.height.equalTo(@(KScreenHeight));
+            make.width.equalTo(@(KScreenWidth*0.8));
+            make.height.equalTo(@(KScreenWidth));
         }];
         userView.transform = CGAffineTransformMakeScale(0.01, 0.01);
         [userView setCloseBlock:^{
@@ -60,20 +92,35 @@ static NSString * const reuseIdentifier = @"LivingViewCell";
 
 
 #pragma mark <UICollectionViewDataSource>
-
-
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return 1;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    LivingViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
     
-    // Configure the cell
+    cell.parentVc = self;  //此处将自己控制器 传给cell 的好处就是  可以在cell 中做很多控制器才能做的是  (添加东西  退出等)
+    cell.live = self.lives[self.currentIndex];
+    NSUInteger relateIndex = self.currentIndex;
+    if (self.currentIndex + 1 == self.lives.count) {
+        relateIndex = 0;
+    }else{
+        relateIndex += 1;
+    }
+    cell.relateLive = self.lives[relateIndex];
+    [cell setClickRelatedLive:^{
+        self.currentIndex += 1;
+        [self.collectionView reloadData]; //此处刷新currentIndex
+    }];
+
     
     return cell;
 }
+#pragma mark   点击了同频道主播
+-(void)ClickOtherAnchor:(NSNotification *)notify{
 
+    NSLog(@"notify=====%@",notify);//User 模型
+}
 
 
 
